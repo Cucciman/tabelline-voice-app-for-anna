@@ -1,0 +1,664 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tabelline Voice App · Kid Edition</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<style>
+  :root {
+    --bg-main: #f4f7ff;
+    --card-bg: #ffffff;
+    --accent: #ff9f4a;
+    --accent-soft: #ffe4c7;
+    --primary: #4a6bff;
+    --primary-soft: #e2e7ff;
+    --success: #23b26b;
+    --error: #e2445c;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui;
+    background: radial-gradient(circle at top, #ffe8c7 0, #f4f7ff 45%, #e7ecff 100%);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 540px;
+    background: var(--card-bg);
+    min-height: 100vh;
+    padding: 20px 18px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  @media (min-width: 640px) {
+    .app {
+      margin: 18px;
+      border-radius: 26px;
+      box-shadow: 0 18px 60px rgba(32, 44, 76, 0.16);
+      min-height: auto;
+    }
+  }
+
+  /* Decorative bubbles */
+  .bubble {
+    position: absolute;
+    border-radius: 999px;
+    opacity: 0.35;
+    z-index: 0;
+  }
+  .bubble.b1 {
+    width: 160px;
+    height: 160px;
+    background: #ffd1e3;
+    top: -60px;
+    right: -40px;
+  }
+  .bubble.b2 {
+    width: 140px;
+    height: 140px;
+    background: #cde5ff;
+    bottom: -40px;
+    left: -30px;
+  }
+
+  .content {
+    position: relative;
+    z-index: 1;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin: 4px 0 2px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 0.92rem;
+    color: #5a647f;
+    margin-bottom: 14px;
+  }
+  .subtitle span {
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  select, button, input {
+    border-radius: 999px;
+    border: none;
+    font-size: 1rem;
+    padding: 12px 16px;
+    width: 100%;
+    margin: 4px 0;
+    font-family: inherit;
+  }
+
+  select {
+    background: var(--primary-soft);
+    color: #1f2942;
+  }
+
+  button {
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: transform 0.08s ease-out, box-shadow 0.08s ease-out, background 0.1s;
+    box-shadow: 0 6px 18px rgba(74, 107, 255, 0.35);
+  }
+  button.secondary {
+    background: var(--primary-soft);
+    color: #1f2942;
+    box-shadow: none;
+  }
+  button:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 3px 10px rgba(74, 107, 255, 0.2);
+  }
+
+  .top-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .top-row > * {
+    flex: 1;
+  }
+
+  .timer {
+    text-align: center;
+    font-size: 1.05rem;
+    margin: 4px 0 10px;
+    min-height: 24px;
+    color: #434b6b;
+  }
+
+  .question-card {
+    background: linear-gradient(135deg, #ffd9a3, #ffc46b);
+    border-radius: 24px;
+    padding: 20px 18px;
+    margin: 8px 0 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .question-label {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(60, 40, 15, 0.85);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .question-main {
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: #3b260f;
+    margin-bottom: 4px;
+  }
+
+  .question-helper {
+    font-size: 0.9rem;
+    color: rgba(46, 30, 13, 0.85);
+  }
+
+  .answer-row {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0 4px;
+  }
+  .answer-row input {
+    flex: 2;
+    background: #f3f4ff;
+    text-align: center;
+    font-size: 1.1rem;
+  }
+  .answer-row button {
+    flex: 1.1;
+  }
+
+  .feedback {
+    text-align: center;
+    font-size: 1.1rem;
+    min-height: 28px;
+    margin: 8px 0 2px;
+  }
+  .feedback.correct {
+    color: var(--success);
+    font-weight: 600;
+  }
+  .feedback.wrong {
+    color: var(--error);
+    font-weight: 600;
+  }
+
+  .stats-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .stats, .stars-info {
+    font-size: 0.9rem;
+    color: #525a77;
+  }
+
+  .stars-info span {
+    font-weight: 600;
+    color: #f59e0b;
+  }
+
+  .scoreboard {
+    background: rgba(226, 232, 255, 0.85);
+    padding: 12px;
+    border-radius: 18px;
+    margin-top: 16px;
+  }
+  .scoreboard h3 {
+    margin: 0 0 6px;
+    font-size: 0.98rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .score-item {
+    padding: 4px 0;
+    border-bottom: 1px dashed rgba(120, 131, 170, 0.5);
+    font-size: 0.82rem;
+    color: #4b5168;
+  }
+  .score-item:last-child {
+    border-bottom: none;
+  }
+
+  /* Celebration stars */
+  .celebration-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 5;
+  }
+  .star {
+    position: absolute;
+    font-size: 1.6rem;
+    animation: float-up 900ms ease-out forwards;
+  }
+  @keyframes float-up {
+    0% {
+      transform: translateY(10px) scale(0.8);
+      opacity: 0;
+    }
+    35% {
+      transform: translateY(-15px) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-40px) scale(0.6);
+      opacity: 0;
+    }
+  }
+
+  /* Small pulsing animation for the question */
+  .question-pulse {
+    animation: pulse 350ms ease-out;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+
+<body>
+<div class="app">
+  <div class="bubble b1"></div>
+  <div class="bubble b2"></div>
+  <div class="celebration-layer" id="celebrationLayer"></div>
+
+  <div class="content">
+    <h1>Tabelline Voice App · Kid Edition</h1>
+    <div class="subtitle">
+      Originally built for <span>Anna</span>, now for all children learning tables 🧡
+    </div>
+
+    <!-- Language & timer -->
+    <div class="top-row">
+      <select id="langSelect">
+        <option value="es">Español 🇪🇸</option>
+        <option value="it">Italiano 🇮🇹</option>
+        <option value="en">English 🇬🇧</option>
+      </select>
+
+      <select id="timerSelect">
+        <option value="0">⏱ Free mode</option>
+        <option value="120">⏱ 2 min</option>
+        <option value="180">⏱ 3 min</option>
+        <option value="300">⏱ 5 min</option>
+      </select>
+    </div>
+
+    <div id="timerDisplay" class="timer"></div>
+
+    <!-- Question card -->
+    <div class="question-card" id="questionCard">
+      <div class="question-label">
+        <span id="challengeLabel">New challenge</span>
+      </div>
+      <div id="question" class="question-main">Click “New Question” to begin.</div>
+      <div id="questionHelper" class="question-helper">The app will say the multiplication out loud.</div>
+    </div>
+
+    <!-- Controls -->
+    <div class="answer-row">
+      <input id="answerInput" type="number" inputmode="numeric" placeholder="Your answer">
+      <button id="checkBtn">✅ Check</button>
+    </div>
+
+    <div class="top-row">
+      <button id="newQBtn">🎲 New Question</button>
+      <button id="repeatBtn" class="secondary">🔊 Repeat</button>
+    </div>
+
+    <!-- Feedback & stats -->
+    <div id="feedback" class="feedback"></div>
+
+    <div class="stats-row">
+      <div id="stats" class="stats"></div>
+      <div class="stars-info">⭐ Stars: <span id="starCount">0</span></div>
+    </div>
+
+    <!-- Score history -->
+    <div class="scoreboard">
+      <h3 id="scoreTitle">📚 Score History</h3>
+      <div id="scoreList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const LANG = {
+  en: {
+    voice: "en-US",
+    ask: (a,b) => `${a} × ${b}`,
+    speakAsk: (a,b) => `How much is ${a} times ${b}?`,
+    feedbackCorrect: [
+      "Great job! 🎉",
+      "Amazing! ⭐",
+      "Well done!",
+      "You’re getting very strong with tables!"
+    ],
+    feedbackWrong: c => `Not this time — the correct answer is ${c}. Try the next one!`,
+    placeholder: "Your answer",
+    stats: (c,t,a) => `Correct: ${c} / ${t} (${a}%)`,
+    timeUp: "⏱ Time's up! Session saved.",
+    helper: "Type the result and press Check.",
+    helperStart: "Click \"New Question\" to begin.",
+    ui: {
+      newQBtn: "🎲 New Question",
+      repeatBtn: "🔊 Repeat",
+      checkBtn: "✅ Check",
+      challengeLabel: "New challenge",
+      scoreTitle: "📚 Score History"
+    }
+  },
+  it: {
+    voice: "it-IT",
+    ask: (a,b) => `${a} × ${b}`,
+    speakAsk: (a,b) => `Quanto fa ${a} per ${b}?`,
+    feedbackCorrect: [
+      "Bravissima! 🎉",
+      "Ottimo lavoro! ⭐",
+      "Perfetto!",
+      "Stai diventando fortissima con le tabelline!"
+    ],
+    feedbackWrong: c => `Non è questa — la risposta giusta è ${c}. Proviamo con la prossima!`,
+    placeholder: "La tua risposta",
+    stats: (c,t,a) => `Corrette: ${c} / ${t} (${a}%)`,
+    timeUp: "⏱ Tempo finito! Sessione salvata.",
+    helper: "Scrivi il risultato e premi Controlla.",
+    helperStart: "Clicca \"Nuova domanda\" per iniziare.",
+    ui: {
+      newQBtn: "🎲 Nuova domanda",
+      repeatBtn: "🔊 Ripeti",
+      checkBtn: "✅ Controlla",
+      challengeLabel: "Nuova sfida",
+      scoreTitle: "📚 Storico punteggi"
+    }
+  },
+  es: {
+    voice: "es-ES",
+    ask: (a,b) => `${a} × ${b}`,
+    speakAsk: (a,b) => `¿Cuánto es ${a} por ${b}?`,
+    feedbackCorrect: [
+      "¡Muy bien! 🎉",
+      "¡Excelente! ⭐",
+      "¡Genial!",
+      "¡Te estás haciendo muy fuerte con las tablas!"
+    ],
+    feedbackWrong: c => `Esta vez no — la respuesta correcta es ${c}. ¡Vamos a por la siguiente!`,
+    placeholder: "Tu respuesta",
+    stats: (c,t,a) => `Correctas: ${c} / ${t} (${a}%)`,
+    timeUp: "⏱ ¡Tiempo agotado! Sesión guardada.",
+    helper: "Escribe el resultado y pulsa Comprobar.",
+    helperStart: "Pulsa \"Nueva pregunta\" para empezar.",
+    ui: {
+      newQBtn: "🎲 Nueva pregunta",
+      repeatBtn: "🔊 Repetir",
+      checkBtn: "✅ Comprobar",
+      challengeLabel: "Nuevo reto",
+      scoreTitle: "📚 Historial de puntuaciones"
+    }
+  }
+};
+
+let lang = "es";
+let a = null, b = null;
+let total = 0, correct = 0;
+let stars = 0;
+let timer = null, remaining = 0;
+
+const questionEl = document.getElementById("question");
+const questionHelperEl = document.getElementById("questionHelper");
+const questionCard = document.getElementById("questionCard");
+const timerEl = document.getElementById("timerDisplay");
+const answerInput = document.getElementById("answerInput");
+const feedbackEl = document.getElementById("feedback");
+const statsEl = document.getElementById("stats");
+const scoreList = document.getElementById("scoreList");
+const starCountEl = document.getElementById("starCount");
+const celebrationLayer = document.getElementById("celebrationLayer");
+const newQBtn = document.getElementById("newQBtn");
+const repeatBtn = document.getElementById("repeatBtn");
+const checkBtn = document.getElementById("checkBtn");
+const scoreTitleEl = document.getElementById("scoreTitle");
+const challengeLabelEl = document.getElementById("challengeLabel");
+
+function speak(text){
+  try {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = LANG[lang].voice;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  } catch(e) {
+    // ignore if not available
+  }
+}
+
+// Weighted table choice: 1 & 2 less frequent, 3–9 equal & more frequent
+function pickTable(){
+  const weightedTables = [
+    1,
+    2,
+    3,3,
+    4,4,
+    5,5,
+    6,6,
+    7,7,
+    8,8,
+    9,9
+  ];
+  const idx = Math.floor(Math.random() * weightedTables.length);
+  return weightedTables[idx];
+}
+
+function triggerCelebration() {
+  for (let i = 0; i < 6; i++) {
+    const star = document.createElement("div");
+    star.className = "star";
+    star.textContent = ["⭐","🌟","✨"][Math.floor(Math.random()*3)];
+    const x = 20 + Math.random() * 60;
+    const y = 40 + Math.random() * 20;
+    star.style.left = x + "%";
+    star.style.top = y + "%";
+    celebrationLayer.appendChild(star);
+    setTimeout(() => {
+      celebrationLayer.removeChild(star);
+    }, 900);
+  }
+}
+
+function updateStats() {
+  if (total === 0) {
+    statsEl.textContent = "";
+    return;
+  }
+  const accuracy = Math.round((correct/total)*100);
+  statsEl.textContent = LANG[lang].stats(correct,total,accuracy);
+}
+
+function randomFrom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function newQuestion(){
+  if (!timer && parseInt(document.getElementById("timerSelect").value,10) > 0) {
+    startTimer(parseInt(document.getElementById("timerSelect").value,10));
+  }
+
+  a = pickTable();
+  b = Math.floor(Math.random()*9)+1;
+
+  questionEl.textContent = LANG[lang].ask(a,b);
+  questionHelperEl.textContent = LANG[lang].helper;
+  answerInput.value = "";
+  answerInput.focus();
+
+  questionCard.classList.remove("question-pulse");
+  void questionCard.offsetWidth; // restart animation
+  questionCard.classList.add("question-pulse");
+
+  speak(LANG[lang].speakAsk(a,b));
+}
+
+function check(){
+  if(a === null) return;
+  const value = parseInt(answerInput.value,10);
+  if(isNaN(value)) return;
+
+  const result = a * b;
+  total++;
+
+  if(value === result){
+    correct++;
+    stars++;
+    starCountEl.textContent = stars;
+    feedbackEl.textContent = randomFrom(LANG[lang].feedbackCorrect);
+    feedbackEl.className = "feedback correct";
+    triggerCelebration();
+  } else {
+    feedbackEl.textContent = LANG[lang].feedbackWrong(result);
+    feedbackEl.className = "feedback wrong";
+  }
+
+  updateStats();
+  newQuestion();
+}
+
+function startTimer(seconds){
+  if (timer) {
+    clearInterval(timer);
+  }
+  remaining = seconds;
+  timerEl.textContent = "⏱ " + formatTime(remaining);
+  timer = setInterval(()=>{
+    remaining--;
+    timerEl.textContent = "⏱ " + formatTime(remaining);
+    if(remaining <= 0){
+      endSession();
+    }
+  },1000);
+}
+
+function endSession(){
+  clearInterval(timer);
+  timer = null;
+  timerEl.textContent = LANG[lang].timeUp;
+  saveScore();
+  a = null;
+}
+
+function formatTime(sec){
+  const m = Math.floor(sec/60);
+  const s = sec % 60;
+  return `${m}:${s.toString().padStart(2,"0")}`;
+}
+
+function saveScore(){
+  if(total === 0) return;
+  const date = new Date().toLocaleString();
+  const score = `${date} — ${correct}/${total} (⭐ ${stars})`;
+  let history = JSON.parse(localStorage.getItem("tabellineScores") || "[]");
+  history.unshift(score);
+  localStorage.setItem("tabellineScores", JSON.stringify(history));
+  renderScores();
+}
+
+function renderScores(){
+  const history = JSON.parse(localStorage.getItem("tabellineScores") || "[]");
+  scoreList.innerHTML = history.slice(0,10)
+    .map(s => `<div class="score-item">${s}</div>`)
+    .join("");
+}
+
+function applyLanguageUI() {
+  const L = LANG[lang];
+  answerInput.placeholder = L.placeholder;
+  newQBtn.textContent = L.ui.newQBtn;
+  repeatBtn.textContent = L.ui.repeatBtn;
+  checkBtn.textContent = L.ui.checkBtn;
+  scoreTitleEl.textContent = L.ui.scoreTitle;
+  challengeLabelEl.textContent = L.ui.challengeLabel;
+
+  if (a !== null) {
+    questionEl.textContent = L.ask(a,b);
+    questionHelperEl.textContent = L.helper;
+  } else {
+    questionEl.textContent = L.helperStart;
+    questionHelperEl.textContent = L.helperStart;
+  }
+}
+
+// Events
+document.getElementById("langSelect").onchange = e => {
+  lang = e.target.value;
+  feedbackEl.textContent = "";
+  applyLanguageUI();
+};
+
+document.getElementById("newQBtn").onclick = () => {
+  if(!timer && parseInt(document.getElementById("timerSelect").value,10) === 0){
+    // Reset stats in free mode when starting a new session
+    total = 0;
+    correct = 0;
+    stars = 0;
+    starCountEl.textContent = stars;
+    statsEl.textContent = "";
+    feedbackEl.textContent = "";
+  }
+  newQuestion();
+};
+
+document.getElementById("repeatBtn").onclick = () => {
+  if(a!==null) speak(LANG[lang].speakAsk(a,b));
+};
+
+document.getElementById("checkBtn").onclick = check;
+
+answerInput.addEventListener("keydown", e => {
+  if(e.key === "Enter") check();
+});
+
+// Initial setup: default Spanish
+lang = "es";
+document.getElementById("langSelect").value = "es";
+renderScores();
+applyLanguageUI();
+</script>
+
+</body>
+</html>
